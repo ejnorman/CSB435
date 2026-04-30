@@ -10,12 +10,12 @@
 
 **1. What type of injection vulnerability exists here?**
 
-> _Your answer here._
+String based SQL Injection. Someone can inject something malicious in the query.
 
 **2. Example attack payload:**
 
 ```
-Your payload here
+' OR '1'='1
 ```
 
 **3. What damage could an attacker do with this vulnerability?**
