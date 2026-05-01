@@ -187,19 +187,19 @@ Potentially. In "if password_hash == stored_hash:" Python's == operator does byt
 
 **1. What cryptography mistake makes this token generation insecure?**
 
-> _Your answer here._
+Python's random is only psuedo random and not suitable for cryptography. This makes every number it generates guessable and mathematically predictable.
 
 **2. How could an attacker predict these session tokens?**
 
-> _Your answer here._
+Obtain the request timestamp, reseed random with the timestamp, then generate the same token space.
 
 **3. How long should session tokens be, and why?**
 
-> _Your answer here._
+Not any character length but 128 bits of entropy. The current implemetation only has 13 bits of entropy. 128 bits of entropy is 2^128 possible combinations, which is more than enough.
 
 **4. What's the difference between the `random` and `secrets` modules in Python?**
 
-> _Your answer here._
+`random` is deterministic, meaning that if the seed number is known then every output is known. `secrets` comes from OS hardware entropy which is unpridictable and secure.
 
 ---
 
@@ -208,27 +208,27 @@ Potentially. In "if password_hash == stored_hash:" Python's == operator does byt
 ### Vulnerability Rankings
 
 | Rank | Snippet # | Vulnerability Name | Severity |
-|------|-----------|-------------------|----------|
-| 0 | | | |
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
+|---|---|---|---|
+| 1 | 1 | SQL Injection (quoted string, single parameter) | Critical |
+| 2 | 3 | Stored XSS + Unquoted SQL Injection (chained) | Critical |
+| 3 | 4 | Double SQL Injection (unquoted integer + quoted string UNION) | Critical |
+| 4 | 7 | Predictable Session Tokens (PRNG + time seed) | High |
+| 5 | 2 | OS Command Injection via `os.system()` | High |
+| 6 | 5 | OS Command Injection via `shell=True` (two injection points) | High |
+| 7 | 6 | MD5 Password Hashing + No Salting + Broken Comparison + No Validation | High |
 
 ### Which single vulnerability would you fix first?
 
-> _Your answer here (~paragraph)._
+The SQL injection in Snippet 1 since it is the easiest to exploit. An attacker can exploit this immediately without any external tools directly in the input. They can also directly access the database which can include sensitive patient information. Also the fix for this relatively easy meaning I could get to fixing another vulnurability more quickly.
 
 ### Which vulnerability would take the longest to fix?
 
-> _Your answer here (~paragraph)._
+Snippet 6, the password storage system. MD5 is not secure so the entire code would have to be switched to a more secure standard like bcrypt. Once everything is switched to bcrypt, every password then needs to be rehashed since none of the hashes are secure. This can take a very long time depending on how big the database is.
 
 ### How much do you plan to charge for your security review?
 
-> _Your answer here (~sentences)._
+Given the number of vulnarabilities, the codebase will need some serious work. On top of that there will be an extra fee for dealing with sensitive data since this is a medical application. I'm thinking $10,000 :)
 
 ### Do you plan to sign up for FroggyHealthPortal?
 
-> _Your answer here (~sentences)._
+In its current state, absolutely not (unless my id ends in ' UNION SELECT ssn, name, dob, address, phone, null, null FROM patients--). After my team and I fix the codebase, then I'd gladly sign up.
