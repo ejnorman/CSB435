@@ -159,4 +159,4 @@ Based on the command line experience, I will try to avoid having spaces and dash
 
 [image3]: https://github.com/ejnorman/CSB435/blob/main/images/HTSBasic6.png
 
-[image4]: https://github.com/ejnorman/CSB435/blob/main/images/GruyereStoredXSS.png
+[image4]: https://github.com/ejnorman/CSB435/blob/main/images/StoredXSSGruyere.png
